@@ -1,0 +1,2 @@
+name = "harness-tutorial"
+pages_build_output_dir = ".vitepress/dist"
