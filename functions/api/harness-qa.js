@@ -77,6 +77,31 @@ function isHarnessScopedQuestion(question) {
   return HARNESS_KEYWORDS.some((keyword) => lower.includes(keyword))
 }
 
+function isCapabilityQuestion(question) {
+  const normalized = question.toLowerCase().replace(/\s+/g, '')
+  return [
+    '你能做什么',
+    '你可以做什么',
+    '能做什么',
+    '可以做什么',
+    '能问什么',
+    '怎么用',
+    '如何使用',
+    'whatcanyoudo',
+    'howtouse'
+  ].some((pattern) => normalized.includes(pattern))
+}
+
+function capabilityAnswer() {
+  return [
+    '我可以回答这套 Harness 教程相关的问题，帮你把抽象概念落到工作场景里。',
+    '',
+    '你可以问：什么是 Harness？什么时候需要它？怎么约束 Agent？产品经理/市场经理怎么从飞书 CLI、Codex、Skills 开始用？Long-Horizon 和 Continual Learning 对普通 AI 学习者意味着什么？',
+    '',
+    '为了省 token，我不做泛聊天。建议这样问：产品经理在项目启动时如何判断要不要部署一套 Harness？'
+  ].join('\n')
+}
+
 function extractAnswer(payload) {
   const parts = payload?.candidates?.[0]?.content?.parts || []
   const text = parts
@@ -163,17 +188,26 @@ export async function onRequestPost(context) {
     return json({ error: `问题请控制在 ${MAX_QUESTION_LENGTH} 字以内。` }, 400)
   }
 
-  if (!isHarnessScopedQuestion(question)) {
-    return json({
-      error: '这个问答框只回答 Harness、Agent、Skills、飞书 CLI、Long-Horizon 等教程相关问题。可以把问题缩窄后再问。'
-    }, 400)
-  }
-
   const day = getShanghaiDayKey()
   const ipHash = await sha256Short(getClientIp(request))
   const key = `harness-qa:${day}:${ipHash}`
   const rawCount = await env.HARNESS_QA_LIMITS.get(key)
   const count = Number(rawCount || 0)
+
+  if (isCapabilityQuestion(question)) {
+    return json({
+      answer: capabilityAnswer(),
+      remaining: Math.max(0, DAILY_LIMIT - count),
+      limit: DAILY_LIMIT,
+      day
+    })
+  }
+
+  if (!isHarnessScopedQuestion(question)) {
+    return json({
+      error: '这个问答框只回答 Harness、Agent、Skills、飞书 CLI、Long-Horizon 等教程相关问题。可以把问题缩窄后再问。'
+    }, 400)
+  }
 
   if (count >= DAILY_LIMIT) {
     return json({

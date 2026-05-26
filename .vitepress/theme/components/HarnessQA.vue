@@ -14,11 +14,24 @@ const limit = ref<number | null>(3)
 const isOpen = ref(false)
 
 const canSubmit = computed(() => {
-  return !loading.value && question.value.trim().length >= 8
+  return !loading.value && question.value.trim().length > 0
+})
+
+const actionHint = computed(() => {
+  if (!question.value.trim()) {
+    return '输入问题后即可提问。同一 IP 每天最多 3 次。'
+  }
+
+  return '建议问具体工作问题；太宽泛的问题会被自动收窄到 Harness 视角。'
 })
 
 async function submitQuestion() {
-  if (!canSubmit.value) return
+  if (loading.value) return
+
+  if (!question.value.trim()) {
+    error.value = '先输入一个问题，我再帮你回答。'
+    return
+  }
 
   loading.value = true
   answer.value = ''
@@ -105,7 +118,7 @@ async function submitQuestion() {
         {{ loading ? '思考中...' : '提问' }}
       </button>
       <span class="harness-qa__hint">
-        同一 IP 每天最多 3 次，建议问具体工作问题而不是泛AI问题。
+        {{ actionHint }}
       </span>
     </div>
 
