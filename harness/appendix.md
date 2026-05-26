@@ -97,6 +97,33 @@ dot -Tpng input.dot -o output.png
 ln -sf AGENTS.md CLAUDE.md
 ```
 
+## F2. 教程站知识问答的最小上线配置
+
+如果你要把 Harness 教程发布成带“限次知识问答”的网站，最小可用配置建议是：
+
+| 层 | 最小方案 |
+|----|----------|
+| **前端** | 静态站里的问答组件 |
+| **服务端** | Cloudflare Pages Functions |
+| **模型** | Gemini API |
+| **限流** | Cloudflare KV，按 `IP + 日期` 计数 |
+| **边界控制** | 服务端关键词预筛 + 模型系统提示词 |
+
+### 一次性配置项
+
+1. 在 Cloudflare Pages 项目中绑定 `GEMINI_API_KEY`
+2. 绑定一个 KV namespace，例如 `HARNESS_QA_LIMITS`
+3. 把问答接口放在 `/functions/api/harness-qa.*`
+4. 前端调用同域 `/api/harness-qa`
+
+### 为什么这个方案适合个人教程站？
+
+- **便宜**：静态站仍然是主结构，只把问答放进函数
+- **简单**：不需要单独买服务器
+- **可控**：频率、话题、输出长度都能在服务端约束
+- **可迁移**：以后换域名，主要迁的是 DNS、Pages 项目和环境变量，不是整套重写
+
+
 ## G. Karpathy LLM Wiki：知识库即Harness的知识层
 
 Karpathy提出的三层知识架构与Harness的Memory Layer高度对应：
