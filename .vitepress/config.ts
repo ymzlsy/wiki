@@ -14,7 +14,8 @@ export default defineConfig({
           // 以后新增教程在这里加一行即可
           // { text: 'Hermes', link: '/hermes/intro' },
         ]
-      }
+      },
+      { text: '知识问答', link: '/harness/module-7' }
     ],
     sidebar: {
       // ===== Harness Engineering 教程 =====

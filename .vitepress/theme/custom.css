@@ -1,0 +1,50 @@
+:root {
+  --karaithy-ai-orange: #d97706;
+  --karaithy-ai-orange-soft: #f59e0b;
+  --karaithy-ink: #191714;
+}
+
+.VPNavBarTitle .title span,
+.VPHero .heading .name,
+.VPFooter .message {
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    var(--karaithy-ink) 0%,
+    var(--karaithy-ink) 46%,
+    var(--karaithy-ai-orange) 46%,
+    var(--karaithy-ai-orange-soft) 61%,
+    var(--karaithy-ink) 61%,
+    var(--karaithy-ink) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.VPHero .tagline {
+  max-width: 34rem;
+}
+
+.VPButton.brand {
+  background: linear-gradient(135deg, #2e6b4c, #1f4f38);
+  border-color: #1f4f38;
+}
+
+.VPButton.alt {
+  border-color: rgba(217, 119, 6, 0.24);
+  color: #9a5800;
+}
+
+.VPButton.alt:hover {
+  border-color: rgba(217, 119, 6, 0.42);
+  color: #7c4300;
+}
+
+.vp-doc h2[id="harness-知识问答"],
+.vp-doc h2[id="harness-知识问答"] + p {
+  scroll-margin-top: 88px;
+}
+
+.VPFeature .title {
+  line-height: 1.35;
+}
