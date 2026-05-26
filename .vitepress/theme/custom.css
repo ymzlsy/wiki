@@ -4,21 +4,43 @@
   --karaithy-ink: #191714;
 }
 
-.VPNavBarTitle .title span,
-.VPHero .heading .name,
-.VPFooter .message {
-  color: transparent;
-  background-image: linear-gradient(
-    90deg,
-    var(--karaithy-ink) 0%,
-    var(--karaithy-ink) 46%,
-    var(--karaithy-ai-orange) 46%,
-    var(--karaithy-ai-orange-soft) 61%,
-    var(--karaithy-ink) 61%,
-    var(--karaithy-ink) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
+.VPNavBarTitle .title > span:not(.karaithy-wordmark),
+.VPHero .heading .name {
+  display: none;
+}
+
+.VPNavBarTitle .title {
+  display: inline-flex;
+  align-items: center;
+}
+
+.karaithy-wordmark {
+  color: var(--karaithy-ink);
+  font-weight: 760;
+  line-height: 1;
+}
+
+.karaithy-wordmark__ai {
+  color: var(--karaithy-ai-orange);
+}
+
+.karaithy-wordmark__suffix {
+  color: inherit;
+}
+
+.karaithy-wordmark--compact {
+  font-size: 18px;
+}
+
+.karaithy-wordmark--hero {
+  display: block;
+  margin-bottom: 18px;
+  font-size: clamp(48px, 8vw, 76px);
+  letter-spacing: 0;
+}
+
+.VPHero .heading {
+  margin-top: 0;
 }
 
 .VPHero .tagline {
@@ -26,8 +48,8 @@
 }
 
 .VPButton.brand {
-  background: linear-gradient(135deg, #2e6b4c, #1f4f38);
-  border-color: #1f4f38;
+  background: linear-gradient(135deg, #2b6b52, #d97706);
+  border-color: transparent;
 }
 
 .VPButton.alt {
@@ -47,4 +69,10 @@
 
 .VPFeature .title {
   line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  .karaithy-wordmark--hero {
+    font-size: 44px;
+  }
 }

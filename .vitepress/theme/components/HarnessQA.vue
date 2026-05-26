@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+const props = defineProps<{
+  floating?: boolean
+}>()
+
 const question = ref('')
 const loading = ref(false)
 const answer = ref('')
 const error = ref('')
 const remaining = ref<number | null>(null)
 const limit = ref<number | null>(3)
+const isOpen = ref(false)
 
 const canSubmit = computed(() => {
   return !loading.value && question.value.trim().length >= 8
@@ -48,7 +53,41 @@ async function submitQuestion() {
 </script>
 
 <template>
-  <div class="harness-qa">
+  <button
+    v-if="props.floating"
+    class="harness-qa-launcher"
+    type="button"
+    aria-label="打开 Harness 知识问答"
+    @click="isOpen = true"
+  >
+    <span class="harness-qa-launcher__mark">AI</span>
+    <span>问答</span>
+  </button>
+
+  <div
+    v-if="!props.floating || isOpen"
+    class="harness-qa-shell"
+    :class="{ 'harness-qa-shell--floating': props.floating }"
+  >
+    <button
+      v-if="props.floating"
+      class="harness-qa-backdrop"
+      type="button"
+      aria-label="关闭知识问答"
+      @click="isOpen = false"
+    />
+
+    <div class="harness-qa" role="dialog" aria-label="Harness 知识问答">
+      <button
+        v-if="props.floating"
+        class="harness-qa__close"
+        type="button"
+        aria-label="关闭知识问答"
+        @click="isOpen = false"
+      >
+        ×
+      </button>
+
     <div class="harness-qa__header">
       <strong>Harness 知识问答</strong>
       <span>只回答 Harness / Agent / Skills / 飞书 CLI / Long-Horizon 相关问题</span>
@@ -82,16 +121,93 @@ async function submitQuestion() {
     <div v-if="error" class="harness-qa__error">
       {{ error }}
     </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.harness-qa-launcher {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(217, 119, 6, 0.22);
+  border-radius: 999px;
+  padding: 10px 14px 10px 10px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #2d241b;
+  box-shadow: 0 16px 42px rgba(26, 20, 14, 0.16);
+  cursor: pointer;
+  font: inherit;
+}
+
+.harness-qa-launcher__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #d97706;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.harness-qa-shell--floating {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 24px;
+}
+
+.harness-qa-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(21, 18, 14, 0.28);
+  cursor: default;
+}
+
 .harness-qa {
+  position: relative;
   margin: 24px 0;
   padding: 20px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(242, 248, 244, 0.92), rgba(255, 255, 255, 0.98));
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 237, 0.88), rgba(255, 255, 255, 0.98)),
+    radial-gradient(circle at 0% 0%, rgba(217, 119, 6, 0.12), transparent 36%);
+}
+
+.harness-qa-shell--floating .harness-qa {
+  z-index: 1;
+  width: min(520px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  margin: 0;
+  box-shadow: 0 24px 70px rgba(21, 18, 14, 0.24);
+}
+
+.harness-qa__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .harness-qa__header {
@@ -132,7 +248,7 @@ async function submitQuestion() {
   border: none;
   border-radius: 999px;
   padding: 10px 18px;
-  background: #2e6b4c;
+  background: #d97706;
   color: #fff;
   cursor: pointer;
   font: inherit;
@@ -151,7 +267,7 @@ async function submitQuestion() {
 }
 
 .harness-qa__answer {
-  background: rgba(46, 107, 76, 0.08);
+  background: rgba(217, 119, 6, 0.08);
 }
 
 .harness-qa__answer h4 {
@@ -169,5 +285,16 @@ async function submitQuestion() {
 .harness-qa__error {
   background: rgba(180, 52, 52, 0.08);
   color: #9d2f2f;
+}
+
+@media (max-width: 640px) {
+  .harness-qa-shell--floating {
+    padding: 12px;
+  }
+
+  .harness-qa-shell--floating .harness-qa {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+  }
 }
 </style>
