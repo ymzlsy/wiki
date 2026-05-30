@@ -1,9 +1,13 @@
-import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid({
   title: 'Karaithy Wiki',
   description: '个人知识库 · 教程 · 学习手册',
   lang: 'zh-CN',
+  mermaid: {},
+  mermaidPlugin: {
+    class: 'mermaid my-class'
+  },
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
@@ -11,13 +15,11 @@ export default defineConfig({
         text: '教程',
         items: [
           { text: 'Harness Engineering', link: '/harness/module-0' },
-          // 以后新增教程在这里加一行即可
-          // { text: 'Hermes', link: '/hermes/intro' },
+          { text: '飞书 CLI 完全指南', link: '/lark-cli/' },
         ]
       },
     ],
     sidebar: {
-      // ===== Harness Engineering 教程 =====
       '/harness/': [
         {
           text: 'Harness Engineering 完全教程',
@@ -39,15 +41,14 @@ export default defineConfig({
           ]
         }
       ],
-      // ===== 以后新增教程，复制这个块 =====
-      // '/hermes/': [
-      //   {
-      //     text: 'Hermes 教程',
-      //     items: [
-      //       { text: '简介', link: '/hermes/intro' },
-      //     ]
-      //   }
-      // ],
+      '/lark-cli/': [
+        {
+          text: '飞书 CLI（lark-cli）完全指南',
+          items: [
+            { text: '完整教程（单页）', link: '/lark-cli/' },
+          ]
+        }
+      ],
     },
     outline: {
       level: [2, 3],
