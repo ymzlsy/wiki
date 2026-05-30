@@ -76,3 +76,34 @@
     font-size: 44px;
   }
 }
+
+/* ===== Mermaid 图尺寸约束：不让单图占满整屏 ===== */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.25rem auto;
+}
+
+.mermaid svg {
+  max-height: 360px !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* 两图并排容器，markdown 里用 <div class="diagram-row"> 包两个 mermaid */
+.diagram-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.diagram-row .mermaid svg {
+  max-height: 280px !important;
+}
+
+@media (max-width: 768px) {
+  .diagram-row {
+    grid-template-columns: 1fr;
+  }
+}

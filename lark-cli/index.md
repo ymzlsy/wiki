@@ -35,54 +35,169 @@
 
 ## 一、先看一张图：飞书 CLI 到底是什么
 
-很多人第一次听到"飞书 CLI"会想：CLI 是命令行吗？我又不写代码，关我什么事？
+### 1.1 你可能已经在用智能伙伴 / 智能体了——那为什么还要看 CLI？
 
-来看一张图，它会瞬间告诉你答案：
+如果你在飞书生态里，大概率早就接触过**飞书智能伙伴**（My AI）和**智能体**（Aily 等飞书原生 Agent）。
+公司里不少同事已经把它们用得很深、很好：让智能伙伴写日报、改文档；让智能体管 OKR、跟项目、做客户对话分析；甚至让智能体在群里值班。**这条路是对的，先继续用、用熟。**
+
+那为什么还要再看一眼"飞书 CLI"？因为它和智能伙伴**不是替代关系，是补位关系**。它们解决的是两个不同问题：
+
+<div class="diagram-row">
+
+```mermaid
+flowchart TB
+    A[你] --> B[飞书智能伙伴<br/>飞书智能体 Aily]
+    B --> C[飞书内部能力<br/>文档·OKR·消息]
+    style B fill:#dbeafe,stroke:#3b82f6
+```
+
+```mermaid
+flowchart TB
+    A2[你] --> D[外部 AI Agent<br/>Claude · Codex · Cursor]
+    D --> E[lark-cli<br/>飞书 CLI]
+    E --> F[飞书 + 本地文件<br/>+ 其他系统]
+    style E fill:#dcfce7,stroke:#22c55e
+```
+
+</div>
+
+一句话区分：
+
+| 维度 | 飞书智能伙伴 / 智能体 | 飞书 CLI + 外部 Agent |
+|---|---|---|
+| **运行位置** | 飞书云端 | 你的电脑 / 服务器 |
+| **触发方式** | 飞书 App 内点选、@、对话 | 终端 / IDE / Claude Code 自然语言 |
+| **能力边界** | 飞书内部功能为主 | 飞书 + **本地文件** + **任意外部系统** |
+| **可编排深度** | 在 Aily 里搭"画布"，有限自由 | 任何能跑命令的地方都能编排 |
+| **代码生产力** | 不擅长（不是定位） | 极强（IDE 里直接边写代码边操作飞书） |
+| **可审计性** | 平台日志 | 你电脑上的命令历史，逐条可回放 |
+| **安全控制** | 企业管理员统一管 | 你本地 OAuth Token + 钥匙串 |
+
+简单一句话：
+
+> **智能伙伴 / 智能体 = 飞书把"AI"放进了飞书；CLI = 你把"飞书"放进了 AI。**
+>
+> 前者优势在飞书内部场景一站式打通；后者优势在让 Cursor / Claude Code / Codex 这种"代码生产力 Agent"把飞书当成可调用工具，混合操作"飞书 + Git 仓库 + 本地文档 + 第三方系统"。
+
+### 1.2 两者具体在哪些事上分工不同
+
+下面这张图横向并列，告诉你"哪些事让智能伙伴做、哪些事让 CLI 做、哪些事两者配合做"——**这是这篇文章的核心定位**：
 
 ```mermaid
 flowchart LR
-    A[你] -->|"用自然语言<br/>说你想做什么"| B[AI Agent<br/>Claude / Codex / Windsurf]
-    B -->|"调用工具"| C[飞书 CLI<br/>lark-cli]
-    C -->|"OAuth 授权后<br/>调用 OpenAPI"| D[飞书 / Lark]
-    D -->|"返回数据"| C
-    C -->|"结构化输出"| B
-    B -->|"自然语言总结<br/>+ 主动建议下一步"| A
+    subgraph S1["✅ 留给飞书智能伙伴 / 智能体"]
+        direction TB
+        a1["飞书内文档总结 / 改写"]
+        a2["OKR 进度推进对话"]
+        a3["群内自然语言问答"]
+        a4["Aily 画布编排<br/>飞书原生工作流"]
+    end
 
-    style A fill:#fef3c7,stroke:#f59e0b
-    style B fill:#dbeafe,stroke:#3b82f6
-    style C fill:#dcfce7,stroke:#22c55e
-    style D fill:#fce7f3,stroke:#ec4899
+    subgraph S2["🤝 两者配合最佳"]
+        direction TB
+        b1["跨群 + 跨文档 + 跨系统的<br/>项目周报 / 复盘"]
+        b2["客户反馈 → Base 池 →<br/>AI 分类 → 决策"]
+        b3["飞书内容 ↔ 本地代码仓库 /<br/>secondbrain 双向同步"]
+    end
+
+    subgraph S3["🔧 CLI + 外部 Agent 的独门绝技"]
+        direction TB
+        c1["本地 Markdown 一键发布<br/>飞书文档 / 知识库"]
+        c2["在 IDE 写代码 / 改 Bug<br/>同时联动飞书任务"]
+        c3["把飞书数据接入<br/>自己的 Python / Node 脚本"]
+        c4["批量自动化：百份合同、<br/>千条工单、复杂 ETL"]
+    end
+
+    style S1 fill:#eff6ff,stroke:#3b82f6
+    style S2 fill:#fffbeb,stroke:#f59e0b
+    style S3 fill:#f0fdf4,stroke:#22c55e
 ```
 
-一句话总结：
+### 1.3 两个更现实的对比例子（替代"60 秒"那种"非黑即白"的故事）
 
-> **飞书 CLI 是 AI Agent 操作飞书的"标准插座"。**
->
-> 你说人话，AI 帮你翻译成命令，命令通过 CLI 调用飞书 OpenAPI，结果再翻译成人话返回给你。
+**例子 A：周一上午写一份"上周项目周报"**
 
-它不是给程序员准备的玩具，恰恰相反——它最大的受益人，是 **每天要在飞书里点来点去 50 次、复制粘贴 30 段文字、追着群消息整理待办** 的 **非程序员岗位**。
+- 用智能伙伴：在飞书里 @ 智能伙伴 → "帮我总结上周的会议纪要" → 它给你一段文字 → 你手动整理到周报模板里 → 还得自己去翻群消息和 Base 里的任务状态。**很快，但天花板是飞书内部信息。**
+- 用 CLI + Claude Code：在 IDE 里说一句"读上周妙记、项目群消息和 Base 任务表，结合本地 secondbrain 里的项目模板生成周报草稿，发到周报知识库，并把行动项写回任务表"。**Claude Code 串起 5–6 个步骤，1 分钟交付，跨系统数据全打通。**
 
-### 一个 60 秒的真实例子
+两个都能用。前者更轻、更"在飞书里"；后者更重、更"跨系统"。**选什么取决于本周的数据是不是都在飞书内**。
 
-打开任何一个支持 Skills 的 AI Agent（如 Claude Code），输入：
+**例子 B：客户反馈进入多维表格再做分类决策**
 
-> 帮我看看"沈阳客运需求开发群"今天上午的消息，把所有"客户提到的需求"和"研发回复的卡点"分两栏整理成一篇飞书文档，文档标题用"2026-05-30 沈阳客运需求群日报"，发到我的"沈阳客运"知识库下。
+- 智能体（Aily）：可以做，但你需要在 Aily 画布里搭一个流程，调用飞书内的反馈来源、调用 LLM 节点、写入 Base。学习曲线在 Aily 自身。
+- CLI + Codex：本地一个 30 行脚本：`lark-cli im +chat-messages-list` 取群里反馈 → 让 Codex 做分类 → `lark-cli base records batch_create` 写入 Base。**改一行代码就能加新来源（邮件、表单、CSV、CRM 导出）**。
 
-如果不用 CLI，你需要：
-1. 打开飞书
-2. 找到群
-3. 滚动消息
-4. 复制粘贴到文档
-5. 手动分类
-6. 新建文档
-7. 设置标题
-8. 移动到知识库
+> 结论：**不是非此即彼**。智能伙伴负责飞书内部"对话即可达成"的事；CLI 负责飞书外部"要写一点点逻辑、要打通别的系统、要在 IDE 里和代码一起做"的事。
 
-至少 30 分钟。
+### 1.4 高阶能力一览：CLI + 外部 Agent 能做、智能伙伴不擅长的事
 
-用 CLI + AI，你只需要按下回车。剩下的事 Agent 通过 `lark-cli im +chat-messages-list`、`lark-cli docs +create`、`lark-cli wiki nodes create` 自己完成。**约 90 秒**。
+下面这张图（横向，避免占满屏）列出 CLI 真正的"高阶玩法"，以及每件事对应什么岗位、需要搭配哪种外部 Agent 工具：
 
-这就是为什么飞书 CLI 是 2026 年最被低估的办公生产力工具。
+```mermaid
+flowchart LR
+    subgraph G1["跨系统编排"]
+        direction TB
+        x1["飞书 ↔ Git / Jira / Notion<br/>双向同步"]
+        x2["飞书 ↔ 本地 Markdown / Obsidian<br/>知识库互转"]
+    end
+    subgraph G2["IDE 内联动"]
+        direction TB
+        y1["代码评审同时<br/>更新飞书任务状态"]
+        y2["写完文档自动发布到<br/>飞书知识库 + 通知群"]
+    end
+    subgraph G3["批量自动化"]
+        direction TB
+        z1["千份合同审批<br/>批量抓取分析"]
+        z2["万条工单 → Base ETL"]
+    end
+
+    G1 --> Tools["搭配：Claude Code · Codex · Cursor<br/>Windsurf · Hermes"]
+    G2 --> Tools
+    G3 --> Tools
+
+    style Tools fill:#dcfce7,stroke:#22c55e
+```
+
+**岗位 × 高阶用法 × 推荐 Agent 工具**：
+
+| 岗位 | 高阶用法 | 推荐外部 Agent |
+|---|---|---|
+| **产品经理** | 把"群里反馈 + 飞书文档 + Jira 工单"拉到一处做需求池分析 | Claude Code / Codex |
+| **研发 / SRE** | IDE 里 commit 完代码，Cursor 顺手把任务、文档、群通知都改好 | Cursor / Claude Code |
+| **项目经理** | 多项目周报：跨 5+ 群消息 + 妙记 + Base 任务 + secondbrain 模板一键生成 | Claude Code |
+| **运营 / 增长** | 多渠道反馈（飞书群、邮件、CSV、表单）→ AI 分类 → Base 池 → 决策看板 | Codex / Claude Code |
+| **销售 / BD** | 客户对话纪要 → 商机字段更新 + 跟进任务批量创建 | Claude Code |
+| **HR / 行政** | 招聘日程多角色协调；onboarding 文档批量生成 + 自动入库 | Codex |
+| **客户成功** | 工单关键词实时事件订阅（`lark-cli event`）→ 高优工单自动升级 | Claude Code + 定时调度 |
+| **数据 / 分析** | 飞书 Base / Sheets 当数据源，本地 Python 做 ETL，分析结果回写文档 | Codex / Cursor |
+| **一人公司 / 自由职业者** | 多客户多账号统一看板；secondbrain 内容批量发布到不同客户飞书空间 | Claude Code |
+
+### 1.5 一张更准确的"它在哪一层"图
+
+```mermaid
+flowchart LR
+    U[你] --> A1[飞书智能伙伴]
+    U --> A2[飞书智能体 Aily]
+    U --> A3[外部 AI Agent<br/>Claude Code / Codex / Cursor]
+    A1 --> F[飞书]
+    A2 --> F
+    A3 --> CLI[lark-cli]
+    CLI --> F
+    CLI --> LOCAL[本地文件 / 代码仓库 / 其他系统]
+
+    style A1 fill:#dbeafe,stroke:#3b82f6
+    style A2 fill:#dbeafe,stroke:#3b82f6
+    style A3 fill:#dcfce7,stroke:#22c55e
+    style CLI fill:#dcfce7,stroke:#22c55e
+```
+
+到这里你应该已经有判断：
+
+- **如果你只在飞书里办公，且任务能用对话完成：先用智能伙伴 / Aily，省事。**
+- **如果你的任务涉及"代码 / 本地文件 / 第三方系统 / 复杂批处理 / IDE 协作"：必须上 CLI + 外部 Agent。**
+- **大多数严肃的项目交付场景，两者都会用上。**
+
+下面所有章节都围绕"CLI + 外部 Agent"这条线展开。智能伙伴 / Aily 不是本文重点（飞书官方文档已经讲得很好），需要时移步 [飞书智能伙伴官方介绍](https://www.feishu.cn/hc/zh-CN/articles/360054572593) 与 [飞书智能体 Aily 平台](https://www.feishu.cn/product/ai)。
 
 ---
 
@@ -108,50 +223,18 @@ flowchart LR
 
 ## 三、谁应该看这篇文章（按岗位拆解）
 
-```mermaid
-mindmap
-  root((飞书 CLI<br/>谁能用上))
-    产品经理
-      需求池自动维护
-      竞品反馈分析
-      会议纪要转 PRD 行动项
-      跨群信息聚合周报
-    运营 / 增长
-      用户反馈进多维表格
-      活动数据日报
-      内容发布 Markdown→飞书
-      KOL 对话整理
-    研发 / 工程
-      Bug 单同步 Base
-      代码评审会议总结
-      项目交付台账
-      Schema 自省做集成
-    销售 / BD
-      客户群信息提取
-      拜访纪要转文档
-      商机台账更新
-      跟进任务自动建
-    HR / 行政
-      面试日程自动安排
-      入职 onboarding 文档
-      考勤报表导出
-      培训反馈分析
-    客户成功 / 售后
-      工单日报
-      客户群风险预警
-      问题分类台账
-      满意度调研聚合
-    财务 / 法务
-      合同审批数据导出
-      报销表格抓取
-      流程效率分析
-      OKR 进度抽取
-    一人公司 / 自由职业者
-      多客户群统一看板
-      会议纪要→交付文档
-      Markdown→飞书发布
-      项目管理 Base
-```
+用一张紧凑的表替代大思维导图：
+
+| 岗位 | 4 个典型用法 |
+|---|---|
+| **产品经理** | 需求池自动维护 · 竞品反馈分析 · 纪要转 PRD 行动项 · 跨群周报 |
+| **运营 / 增长** | 反馈进 Base · 活动数据日报 · Markdown→飞书 · KOL 对话整理 |
+| **研发 / 工程** | Bug 单同步 Base · 代码评审纪要 · 项目台账 · Schema 集成 |
+| **销售 / BD** | 客户群信息提取 · 拜访纪要转文档 · 商机台账 · 跟进任务批量建 |
+| **HR / 行政** | 面试日程自动协调 · onboarding 文档 · 考勤导出 · 培训反馈分析 |
+| **客户成功 / 售后** | 工单日报 · 客户群风险预警 · 问题分类台账 · 满意度调研 |
+| **财务 / 法务** | 合同审批数据导出 · 报销表抓取 · 流程效率分析 · OKR 抽取 |
+| **一人公司 / 自由职业者** | 多客户群看板 · 纪要→交付文档 · Markdown→飞书 · 项目 Base |
 
 如果你属于其中任何一类，这篇文章都值得收藏。如果你不属于但你的同事属于，请把这篇文章转发给他。
 
@@ -162,33 +245,9 @@ mindmap
 理解飞书 CLI 的命令体系，是理解它为什么"好用"的关键。
 
 ```mermaid
-flowchart TD
-    subgraph L1["第一层：快捷命令（+ 前缀）"]
-        direction LR
-        L1a["lark-cli calendar +agenda"]
-        L1b["lark-cli im +messages-send"]
-        L1c["lark-cli docs +create"]
-        L1d["人类友好 · AI 友好 · 覆盖 80% 高频场景"]
-    end
-
-    subgraph L2["第二层：API 命令"]
-        direction LR
-        L2a["lark-cli calendar events list"]
-        L2b["lark-cli base records create"]
-        L2c["lark-cli wiki nodes copy"]
-        L2d["与飞书 API 端点一一对应 · 100+ 精选命令"]
-    end
-
-    subgraph L3["第三层：通用 API 调用"]
-        direction LR
-        L3a["lark-cli api GET /open-apis/..."]
-        L3b["lark-cli api POST /open-apis/..."]
-        L3c["覆盖全部 2500+ 飞书开放平台端点"]
-    end
-
-    L1 -->|"满足不了？降到下一层"| L2
-    L2 -->|"还不行？终极兜底"| L3
-
+flowchart LR
+    L1["L1 快捷命令<br/>+ 前缀<br/>覆盖 80% 高频"] -->|不够用| L2["L2 API 命令<br/>100+ 精选<br/>对齐 OpenAPI"]
+    L2 -->|兜底| L3["L3 通用调用<br/>api GET/POST<br/>2500+ 端点"]
     style L1 fill:#dcfce7,stroke:#22c55e
     style L2 fill:#dbeafe,stroke:#3b82f6
     style L3 fill:#fce7f3,stroke:#ec4899
@@ -352,24 +411,16 @@ lark-cli doctor
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant U as 你
-    participant T as 终端
-    participant N as Node.js
     participant C as lark-cli
-    participant S as Agent Skills
-
-    U->>T: 安装 Node.js
-    T->>N: brew install node@20
-    N-->>T: ✓ 完成
-    U->>T: npm install -g @larksuite/cli
-    T->>C: 全局安装 v1.0.32
-    C-->>T: ✓ 完成
-    U->>T: npx skills add larksuite/cli -y -g
-    T->>S: 安装 26 个 lark-* Skills 到 ~/.agents/skills
-    S-->>T: ✓ 26 个 Skills 就绪
-    U->>T: lark-cli doctor
-    T->>C: 健康检查
-    C-->>U: ⚠ auth: not configured（下一步授权）
+    participant S as Skills
+    U->>C: npm i -g @larksuite/cli
+    C-->>U: v1.0.32 ✓
+    U->>S: npx skills add larksuite/cli -y -g
+    S-->>U: 26 个 Skills 就绪
+    U->>C: lark-cli doctor
+    C-->>U: ⚠ 待授权（下一步）
 ```
 
 ---
@@ -381,25 +432,16 @@ sequenceDiagram
 ### 6.1 整体流程一张图
 
 ```mermaid
-flowchart TD
-    A[开始] --> B{已有飞书<br/>自建应用？}
-    B -->|否| C[在飞书开放平台<br/>创建一个自建应用]
-    B -->|是| D
-    C --> D[lark-cli config init --new]
-    D --> E[输入 App ID 和 App Secret]
-    E --> F[lark-cli auth login --recommend]
-    F --> G[浏览器自动打开<br/>飞书授权页]
-    G --> H[勾选权限范围]
-    H --> I[确认授权]
-    I --> J[CLI 收到 token<br/>加密存入 Keychain]
-    J --> K[lark-cli auth status]
-    K --> L{✓ 显示登录成功？}
-    L -->|是| M[完成 ✓]
-    L -->|否| N[lark-cli doctor 排查]
-    N --> F
-
-    style M fill:#dcfce7,stroke:#22c55e
-    style N fill:#fee2e2,stroke:#ef4444
+flowchart LR
+    A[开放平台<br/>建自建应用] --> B[config init<br/>填 App ID/Secret]
+    B --> C[auth login<br/>--recommend]
+    C --> D[浏览器授权]
+    D --> E{auth status<br/>OK?}
+    E -->|是| F[✓ 完成]
+    E -->|否| G[doctor 排查]
+    G --> C
+    style F fill:#dcfce7,stroke:#22c55e
+    style G fill:#fee2e2,stroke:#ef4444
 ```
 
 ### 6.2 步骤 1：创建一个飞书自建应用
@@ -571,27 +613,23 @@ lark-cli im +messages-send \
 
 下面我们按业务域系统地过一遍。你不需要全部记住——只需要知道"飞书里我能做的几乎所有事，CLI 都能做"。
 
-```mermaid
-graph LR
-    CLI[lark-cli]
-    CLI --> IM[im 消息]
-    CLI --> DOCS[docs 文档]
-    CLI --> BASE[base 多维表格]
-    CLI --> SHEETS[sheets 电子表格]
-    CLI --> CAL[calendar 日历]
-    CLI --> VC[vc 会议]
-    CLI --> MIN[minutes 妙记]
-    CLI --> TASK[task 任务]
-    CLI --> WIKI[wiki 知识库]
-    CLI --> DRIVE[drive 云空间]
-    CLI --> MAIL[mail 邮箱]
-    CLI --> CONTACT[contact 通讯录]
-    CLI --> SLIDES[slides 演示]
-    CLI --> APPROVAL[approval 审批]
-    CLI --> OKR[okr 目标]
-    CLI --> ATT[attendance 考勤]
-    CLI --> WB[whiteboard 白板]
+命令域按"沟通 / 内容 / 数据 / 调度 / 治理"五类一目了然：
 
+| 分组 | 命令域 |
+|---|---|
+| 沟通协作 | `im` 消息 · `mail` 邮箱 · `contact` 通讯录 |
+| 内容创作 | `docs` 文档 · `markdown` MD互转 · `wiki` 知识库 · `slides` 演示 · `whiteboard` 白板 · `drive` 云空间 |
+| 数据生产 | `base` 多维表格 · `sheets` 电子表格 |
+| 时间调度 | `calendar` 日历 · `vc` 会议 · `minutes` 妙记 · `task` 任务 · `attendance` 考勤 |
+| 流程治理 | `approval` 审批 · `okr` 目标 · `event` 实时事件 |
+
+```mermaid
+flowchart LR
+    CLI[lark-cli] --> A[沟通]
+    CLI --> B[内容]
+    CLI --> C[数据]
+    CLI --> D[调度]
+    CLI --> E[治理]
     style CLI fill:#22c55e,stroke:#16a34a,color:#fff
 ```
 
@@ -705,11 +743,9 @@ lark-cli base records batch_create \
 
 ```mermaid
 flowchart LR
-    A[本地 CSV<br/>客户反馈] -->|"CLI 导入"| B[飞书 Base<br/>反馈池]
-    B -->|"CLI 查询"| C[AI 分析<br/>分类 + 情感]
-    C -->|"CLI 写回"| B
-    B -->|"CLI 导出"| D[周报<br/>飞书文档]
-
+    A[本地 CSV] --> B[飞书 Base<br/>反馈池]
+    B --> C[AI 分类] --> B
+    B --> D[周报文档]
     style B fill:#22c55e,color:#fff
 ```
 
@@ -938,14 +974,11 @@ lark-cli whiteboard +create --title "需求脑图"
 
 ```mermaid
 flowchart LR
-    Skills[26 个 lark-* Skills<br/>位于 ~/.agents/skills/]
-    Skills --> CC[Claude Code]
-    Skills --> CX[Codex CLI]
+    Skills[26 lark-* Skills<br/>~/.agents/skills/] --> CC[Claude Code]
+    Skills --> CX[Codex]
     Skills --> CU[Cursor]
     Skills --> WS[Windsurf]
     Skills --> HM[Hermes]
-    Skills --> OW[其他兼容<br/>Skills 协议的 Agent]
-
     style Skills fill:#22c55e,color:#fff
 ```
 
@@ -1005,11 +1038,7 @@ npx skills add larksuite/cli -y -g
 
 ```mermaid
 flowchart LR
-    A[chat_id] --> B[+chat-messages-list<br/>拉今日全部消息]
-    B --> C[AI 分类<br/>需求/风险/决策/待办]
-    C --> D[+docs create<br/>生成日报文档]
-    D --> E[+wiki nodes copy<br/>移到项目知识库]
-
+    A[chat_id] --> B[拉今日消息] --> C[AI 分类] --> D[生成文档] --> E[入知识库]
     style E fill:#22c55e,color:#fff
 ```
 
@@ -1039,15 +1068,12 @@ lark-cli markdown create --file ./方案.md --title "方案 v1"
 **触发**：`把本周客户反馈整理进反馈池 Base`
 
 ```mermaid
-flowchart TD
-    A1[飞书群消息] --> M[AI 聚合 + 分类]
-    A2[飞书邮件] --> M
-    A3[CRM 对话] --> M
-    A4[问卷结果] --> M
-    M --> B[lark-cli base records batch_create]
-    B --> C[反馈池 Base]
-    C --> D[每周报表自动生成]
-
+flowchart LR
+    A1[群消息] --> M[AI 聚合分类]
+    A2[邮件] --> M
+    A3[CRM] --> M
+    A4[问卷] --> M
+    M --> C[反馈池 Base] --> D[周报表]
     style C fill:#3b82f6,color:#fff
 ```
 
@@ -1109,19 +1135,12 @@ lark-cli event +subscribe \
 ### 工作流 9：周报自动化（综合）
 
 ```mermaid
-flowchart TD
-    A[周一上午 9 点定时触发] --> B[拉上周日历]
-    A --> C[拉上周妙记]
-    A --> D[拉项目群消息]
-    A --> E[拉 Base 任务状态]
-    B --> M[AI 综合]
-    C --> M
-    D --> M
-    E --> M
-    M --> F[生成本周周报文档]
-    F --> G[创建到周报知识库]
-    F --> H[发送到管理群]
-
+flowchart LR
+    A[周一定时] --> B[日历]
+    A --> C[妙记]
+    A --> D[群消息]
+    A --> E[Base 任务]
+    B & C & D & E --> M[AI 综合] --> F[周报] --> G[入库 + 发群]
     style F fill:#22c55e,color:#fff
 ```
 
@@ -1248,24 +1267,26 @@ lark-cli im +chat-messages-list --chat-id oc_xxx \
 
 飞书 CLI 是"以你的身份"操作飞书。这意味着它能做的事 = 你能做的事。**所以安全策略不能偷懒**。
 
+<div class="diagram-row">
+
 ```mermaid
-flowchart TD
-    A[首次授权] --> B{需要的权限?}
-    B -->|"未来三个月真的需要"| C[加入授权范围]
-    B -->|"不确定 / 偶尔"| D[暂不授权<br/>用到再说]
-
-    E[每个写操作] --> F{是否可逆?}
-    F -->|"不可逆<br/>群发/删除/改权限"| G[--dry-run 预览<br/>+ 人工确认]
-    F -->|"可逆<br/>建草稿/Base 记录"| H[直接执行]
-
-    I[AI Agent 协作] --> J{风险等级?}
-    J -->|"低: 读取/搜索"| K[全自动]
-    J -->|"中: 创建草稿"| L[最后一步前确认]
-    J -->|"高: 群发/删除"| M[必须人工敲回车]
-
-    style G fill:#fef3c7,stroke:#f59e0b
-    style M fill:#fee2e2,stroke:#ef4444
+flowchart LR
+    F[写操作] --> G{可逆?}
+    G -->|否| H[dry-run + 人工]
+    G -->|是| I[执行]
+    style H fill:#fef3c7,stroke:#f59e0b
 ```
+
+```mermaid
+flowchart LR
+    J[Agent 动作] --> K{风险}
+    K -->|低 读取| L[全自动]
+    K -->|中 草稿| M[确认]
+    K -->|高 群发/删| N[人工回车]
+    style N fill:#fee2e2,stroke:#ef4444
+```
+
+</div>
 
 ### 12.1 权限授予的金科玉律
 
