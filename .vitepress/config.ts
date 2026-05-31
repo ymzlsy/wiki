@@ -33,6 +33,7 @@ export default withMermaid({
             { text: 'Module 6: 手搓Agent Harness框架', link: '/harness/module-6' },
             { text: 'Module 7: AI产品经理落地指南', link: '/harness/module-7' },
             { text: 'Module 8: 给已有项目布Harness实操', link: '/harness/module-8' },
+            { text: 'Module 9: Dynamic Workflows', link: '/harness/module-9' },
           ]
         },
         {
