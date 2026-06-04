@@ -14,6 +14,7 @@ export default withMermaid({
       {
         text: '教程',
         items: [
+          { text: 'LangChain 生态实战路径', link: '/langchain/' },
           { text: 'Harness Engineering', link: '/harness/module-0' },
           { text: '飞书 CLI 完全指南', link: '/lark-cli/' },
         ]
@@ -48,6 +49,14 @@ export default withMermaid({
           text: '飞书 CLI（lark-cli）完全指南',
           items: [
             { text: '完整教程（单页）', link: '/lark-cli/' },
+          ]
+        }
+      ],
+      '/langchain/': [
+        {
+          text: 'LangChain 生态学习与实战路径',
+          items: [
+            { text: '完整教程（单页）', link: '/langchain/' },
           ]
         }
       ],
